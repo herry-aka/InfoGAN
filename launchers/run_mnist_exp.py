@@ -14,7 +14,7 @@ import datetime
 
 if __name__ == "__main__":
 
-    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    now = datetime.datetime.now(dateutil.tz.tzlocal()) 
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
 
     root_log_dir = "logs/mnist"

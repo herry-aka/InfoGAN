@@ -1,8 +1,7 @@
 import numpy as np
-from tensorflow.examples.tutorials import mnist
 import os
-import numpy as np
-
+import tensorflow as tf
+from keras.datasets import mnist
 
 class Dataset(object):
     def __init__(self, images, labels=None):
@@ -58,25 +57,34 @@ class MnistDataset(object):
         data_directory = "MNIST"
         if not os.path.exists(data_directory):
             os.makedirs(data_directory)
-        dataset = mnist.input_data.read_data_sets(data_directory)
-        self.train = dataset.train
-        # make sure that each type of digits have exactly 10 samples
+        # 使用 tensorflow.keras.datasets.mnist 加载数据
+        (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+
+        # 数据预处理：将图像数据转换为浮点数并归一化到 [0, 1] 范围
+        train_images = train_images.astype(np.float32) / 255.0
+        test_images = test_images.astype(np.float32) / 255.0
+
+        # 创建训练集和测试集对象
+        self.train = Dataset(train_images, train_labels)
+
+        # 确保每种数字都有 10 个样本
         sup_images = []
         sup_labels = []
         rnd_state = np.random.get_state()
         np.random.seed(0)
         for cat in range(10):
-            ids = np.where(self.train.labels == cat)[0]
+            ids = np.where(train_labels == cat)[0]
             np.random.shuffle(ids)
-            sup_images.extend(self.train.images[ids[:10]])
-            sup_labels.extend(self.train.labels[ids[:10]])
+            sup_images.extend(train_images[ids[:10]])
+            sup_labels.extend(train_labels[ids[:10]])
         np.random.set_state(rnd_state)
         self.supervised_train = Dataset(
             np.asarray(sup_images),
             np.asarray(sup_labels),
         )
-        self.test = dataset.test
-        self.validation = dataset.validation
+        self.test = Dataset(test_images, test_labels)
+        # 在 TensorFlow 2.x 中，mnist.load_data() 不返回验证集，这里可以根据需要自行划分
+        self.validation = None
         self.image_dim = 28 * 28
         self.image_shape = (28, 28, 1)
 
