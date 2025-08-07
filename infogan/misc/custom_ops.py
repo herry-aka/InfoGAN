@@ -30,7 +30,7 @@ class conv_batch_norm(pt.VarStoreMethod):
                         scale_after_normalization=True)
             else:
                 normalized_x = tf.nn.batch_norm_with_global_normalization(
-                    x, self.ema.average(self.mean), self.ema.average(self.variance), self.beta,
+                    input_layer.tensor, self.ema.average(self.mean), self.ema.average(self.variance), self.beta,
                     self.gamma, epsilon,
                     scale_after_normalization=True)
             return input_layer.with_tensor(normalized_x, parameters=self.vars)
@@ -46,8 +46,8 @@ class fc_batch_norm(conv_batch_norm):
         if ori_shape[0] is None:
             ori_shape[0] = -1
         new_shape = [ori_shape[0], 1, 1, ori_shape[1]]
-        x = tf.reshape(input_layer.tensor, new_shape)
-        normalized_x = super(self.__class__, self).__call__(input_layer.with_tensor(x), *args, **kwargs)  # input_layer)
+        input_layer.tensor = tf.reshape(input_layer.tensor, new_shape)
+        normalized_x = super(self.__class__, self).__call__(input_layer.with_tensor(input_layer.tensor), *args, **kwargs)  # input_layer)
         return normalized_x.reshape(ori_shape)
 
 
